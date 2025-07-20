@@ -1,16 +1,17 @@
-
-
 resource "aws_iam_role" "lambda_exec" {
   name = "hailstone-lambda-role"
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
-    Statement = [{
-      Action = "sts:AssumeRole",
-      Effect = "Allow",
-      Principal = {
-        Service = "lambda.amazonaws.com"
+    Statement = [
+      {
+        Action = "sts:AssumeRole",
+        Effect = "Allow",
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
       }
-    }]
+    ]
   })
 }
 
@@ -19,19 +20,18 @@ resource "aws_iam_role_policy_attachment" "lambda_basic" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-# Automatically zip up your code
 data "archive_file" "lambda_zip" {
   type        = "zip"
   output_path = "${path.module}/hailstone_lambda.zip"
-  source_dir  = "${path.module}/../src"
-  excludes    = ["terraform", ".terraform", "*.tf", "*.tfstate", "*.tfstate.*"]
+  source_dir  = "${path.module}/../cloud_api"
+  excludes    = [".terraform", "*.tf", "*.tfstate", "*.tfstate.*"]
 }
 
 resource "aws_lambda_function" "hailstone" {
   filename         = data.archive_file.lambda_zip.output_path
   function_name    = "hailstone_lambda"
   role             = aws_iam_role.lambda_exec.arn
-  handler          = "cloud_api.lambda_function.lambda_handler"
+  handler          = "lambda_handler.lambda_handler"
   source_code_hash = filebase64sha256(data.archive_file.lambda_zip.output_path)
   runtime          = "python3.12"
   timeout          = 10
