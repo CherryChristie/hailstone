@@ -36,10 +36,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
 
-    strategy:
-      matrix:
-        env: [dev, prod]
-
     steps:
     - uses: actions/checkout@v4
 
@@ -51,9 +47,10 @@ jobs:
 
     - name: Build & Push Image
       run: |
-        IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/$DOCKER_IMAGE_NAME:${{ matrix.env }}
+        BRANCH_NAME=${GITHUB_REF##*/}
+        IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/$DOCKER_IMAGE_NAME:$BRANCH_NAME
         echo "Building & pushing $IMAGE"
-        docker build --build-arg ENV=${{ matrix.env }} -t $IMAGE .
+        docker build --build-arg ENV=$BRANCH_NAME -t $IMAGE .
         docker push $IMAGE
 
   terraform:
@@ -61,13 +58,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: docker
 
-    strategy:
-      matrix:
-        env: [dev, prod]
-
     defaults:
       run:
-        working-directory: terraform/${{ matrix.env }}
+        working-directory: terraform
 
     steps:
     - uses: actions/checkout@v4
@@ -79,8 +72,11 @@ jobs:
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }} 
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
+
+    - name: Clean up
+      run: rm -rf .terraform
 
     - name: Terraform Init
       run: terraform init -backend-config "bucket=cloudcore0070"
@@ -88,9 +84,8 @@ jobs:
     - name: Terraform Apply
       run: terraform apply -auto-approve
 
-    - name: Save Public IP
+    - name: Save Public API Endpoint
       id: output
       run: |
-        IP=$(terraform output -raw public_ip)
-        echo "ip=$IP" >> $GITHUB_OUTPUT
-
+        ENDPOINT=$(terraform output -raw api_endpoint || echo "N/A")
+        echo "api_endpoint=$ENDPOINT" >> $GITHUB_OUTPUT
