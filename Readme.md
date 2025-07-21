@@ -20,22 +20,22 @@
 
     Multi-environment ready: dev, test, pre-prod, prod
 
-istall dependencies:
-pip install -r requirements.txt
+    istall dependencies:
+    pip install -r requirements.txt
 
 
-To Run Locally:
-    uvicorn api_py.api:app --reload
-
-To test:
-    pytest
-
-
-Dockerbbuild:
-    docker build -t hailstone-app:dev .
-    docker run -p 8000:8000 hailstone-app:dev
-
-Multi-Environments
+    To Run Locally:
+        uvicorn api_py.api:app --reload
+    
+    To test:
+        pytest
+    
+    
+    Dockerbbuild:
+        docker build -t hailstone-app:dev .
+        docker run -p 8000:8000 hailstone-app:dev
+    
+    Multi-Environments
 
     This project supports dev, test, pre-prod, and prod environments.
 
@@ -43,38 +43,38 @@ Multi-Environments
     ✅ In Docker, tag the image accordingly:
 
 
-Kubernetes:
-     we can also run this on kubernetes after provisioning the eks cluster and necessary nodes.
-
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: hailstone-app
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: hailstone
-  template:
+    Kubernetes:
+         we can also run this on kubernetes after provisioning the eks cluster and necessary nodes.
+    
+    apiVersion: apps/v1
+    kind: Deployment
     metadata:
-      labels:
-        app: hailstone
+      name: hailstone-app
     spec:
-      containers:
-      - name: hailstone
-        image: cherrychristie1/hailstone-app:dev
-        ports:
-        - containerPort: 8000
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: hailstone-service
-spec:
-  type: LoadBalancer
-  selector:
-    app: hailstone
-  ports:
+      replicas: 2
+      selector:
+        matchLabels:
+          app: hailstone
+      template:
+        metadata:
+          labels:
+            app: hailstone
+        spec:
+          containers:
+          - name: hailstone
+            image: cherrychristie1/hailstone-app:dev
+            ports:
+            - containerPort: 8000
+    ---
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: hailstone-service
+    spec:
+      type: LoadBalancer
+      selector:
+        app: hailstone
+      ports:
     - protocol: TCP
       port: 80
       targetPort: 8000
