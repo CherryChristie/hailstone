@@ -84,8 +84,7 @@ jobs:
     - name: Terraform Apply
       run: terraform apply -auto-approve
 
-    - name: Save Public API Endpoint
-      id: output
-      run: |
+    - name: Terraform Apply
+      run: terraform destroy -auto-approve
         ENDPOINT=$(terraform output -raw api_endpoint || echo "N/A")
         echo "api_endpoint=$ENDPOINT" >> $GITHUB_OUTPUT
