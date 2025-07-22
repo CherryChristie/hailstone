@@ -39,12 +39,15 @@
 
     This project supports dev, test, pre-prod, and prod environments.
 
-    ✅ In Terraform, you can use a different S3 key or workspace per environment.
-    ✅ In Docker, tag the image accordingly:
+    ✅ In Terraform, we can use a different S3 key or workspace per environment.
+    ✅ In Docker, tag the image accordingly: dev, prod, 
+    we can also use multi build stage for our prod dockerfile to improve performance and ensure security
 
 
     Kubernetes:
          we can also run this on kubernetes after provisioning the eks cluster and necessary nodes.
+
+we can also use InferenceService if implemented with MLflow. 
     
     apiVersion: apps/v1
     kind: Deployment
